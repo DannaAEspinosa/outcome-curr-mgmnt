@@ -1,9 +1,15 @@
 pipeline {
     agent any
+    environment {
+        DOCKER_HOME = tool(name: 'myDocker', type: 'org.jenkinsci.plugins.docker.commons.tools.DockerTool')
+    }
     stages {
-        stage('Initialize'){
-            def dockerHome = tool 'myDocker'
-            env.PATH = "${dockerHome}/bin:${env.PATH}"
+        stage('Initialize') {
+            steps {
+                script {
+                    env.PATH = "${env.DOCKER_HOME}/bin:${env.PATH}"
+                }
+            }
         }
         stage('Build') {
             steps {
@@ -12,22 +18,18 @@ pipeline {
         }
         stage('Run image') {
             steps {
-                sh 'docker build -t  outcome-curr-mgmt .'
-                sh 'docker run -d -p  9092:9092 outcome-curr-mgmt'
+                sh 'docker build -t outcome-curr-mgmt .'
+                sh 'docker run -d -p 9092:9092 outcome-curr-mgmt'
             }
         }
         stage('Run Tests') {
-           steps {
-                script {
-                    sh 'mvn clean test'
-                }
+            steps {
+                sh 'mvn clean test'
             }
         }
-        stage('Report'){
+        stage('Report') {
             steps {
-                script {
-                    sh 'mvn verify'
-                }
+                sh 'mvn verify'
             }
             post {
                 always {
@@ -39,7 +41,11 @@ pipeline {
     post {
         always {
             script {
-                 sh 'docker ps -a -q --filter "ancestor=outcome-curr-mgmt" | grep -q . || docker rmi outcome-curr-mgmt --force'
+                sh '''
+                    docker ps -a -q --filter "ancestor=outcome-curr-mgmt" | grep -q . && \
+                    docker rm $(docker ps -a -q --filter "ancestor=outcome-curr-mgmt") || true
+                    docker rmi outcome-curr-mgmt --force || true
+                '''
             }
         }
         success {
