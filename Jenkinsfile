@@ -1,16 +1,6 @@
 pipeline {
     agent any
-    environment {
-        DOCKER_HOME = tool(name: 'myDocker', type: 'org.jenkinsci.plugins.docker.commons.tools.DockerTool')
-    }
     stages {
-        stage('Initialize') {
-            steps {
-                script {
-                    env.PATH = "${env.DOCKER_HOME}/bin:${env.PATH}"
-                }
-            }
-        }
         stage('Build') {
             steps {
                 sh 'mvn clean install -DskipTests'
