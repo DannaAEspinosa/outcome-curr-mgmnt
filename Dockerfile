@@ -14,7 +14,7 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY --from=build /app/outcome-curr-mgmt/target/outcome-curr-mgmt-1.0-SNAPSHOT.jar /app/outcurr-app.jar
+COPY --from=build /app/outcome-curr-mgmt/target/*.jar /app/outcome-curr-mgmt.ja
 
 EXPOSE 9092
 
