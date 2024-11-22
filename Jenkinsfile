@@ -1,48 +1,62 @@
 pipeline {
-    agent any
+    agent { label 'nodo_docker' }
+    
+    environment {
+        PORT = '8081:8081'
+        NAMEIMAGE = 'outcome'
+    }
+
     stages {
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn clean install -DskipTests'
+                script {
+                    // Construcción de la imagen Docker con el nombre especificado
+                    echo 'Building Docker image...'
+                    bat '''
+                    docker build -t ${NAMEIMAGE} .
+                    '''
+                }
             }
         }
-        stage('Run image') {
+
+        stage('Run Container') {
             steps {
-                sh 'docker build -t outcome-curr-mgmt .'
-                sh 'docker run -d -p 9092:9092 outcome-curr-mgmt'
+                script {
+                    // Ejecución del contenedor con el puerto especificado
+                    echo 'Running container...'
+                    bat '''
+                    docker run -d -p ${PORT} ${NAMEIMAGE}
+                    '''
+                }
             }
         }
-        stage('Run Tests') {
+
+        stage('Execute Tests') {
             steps {
-                sh 'mvn clean test'
+                script {
+                    // Ejecutar las pruebas del proyecto usando Maven
+                    echo 'Running tests with Maven...'
+                    bat 'mvn test'
+                }
             }
         }
-        stage('Report') {
-            steps {
-                sh 'mvn verify'
-            }
-            post {
+	post {
                 always {
-                    archiveArtifacts artifacts: 'outcome-curr-mgmt-coverage/target/site/jacocoaggregate/**/*', allowEmptyArchive: true
+                     archiveArtifacts artifacts: 'outcome-curr-mgmt-coverage/target/site/jacocoaggregate/**/*', allowEmptyArchive: true
                 }
             }
         }
     }
+
     post {
-        always {
-            script {
-                sh '''
-                    docker ps -a -q --filter "ancestor=outcome-curr-mgmt" | grep -q . && \
-                    docker rm $(docker ps -a -q --filter "ancestor=outcome-curr-mgmt") || true
-                    docker rmi outcome-curr-mgmt --force || true
-                '''
-            }
-        }
         success {
-            echo 'Pipeline executed successfully.'
+            // Mensaje cuando el pipeline se ejecuta exitosamente
+            echo 'Pipeline completed successfully!'
         }
+        
         failure {
-            echo 'Pipeline execution failed.'
+            // Mensaje cuando el pipeline falla
+            echo 'Pipeline execution failed. Please check the logs.'
         }
     }
 }
