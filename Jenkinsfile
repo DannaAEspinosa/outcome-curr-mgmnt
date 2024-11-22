@@ -12,9 +12,9 @@ pipeline {
                 script {
                     // Construcción de la imagen Docker con el nombre especificado
                     echo 'Building Docker image...'
-                    bat '''
+                    bat """
                     docker build -t ${NAMEIMAGE} .
-                    '''
+                    """
                 }
             }
         }
@@ -25,9 +25,9 @@ pipeline {
                 script {
                     // Ejecución del contenedor con el puerto especificado
                     echo 'Running container...'
-                    bat '''
+                    bat """
                     docker run -d -p ${PORT} ${NAMEIMAGE}
-                    '''
+                    """
                 }
             }
         }
