@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'nodo_docker' }
+    agent none
     
     environment {
         PORT = '8081:8081'
@@ -8,6 +8,7 @@ pipeline {
 
     stages {
         stage('Build Docker Image') {
+            agent { label 'nodo_docker' }
             steps {
                 script {
                     // Construcción de la imagen Docker con el nombre especificado
@@ -20,6 +21,7 @@ pipeline {
         }
 
         stage('Run Container') {
+            agent { label 'nodo_docker' }
             steps {
                 script {
                     // Ejecución del contenedor con el puerto especificado
@@ -32,6 +34,7 @@ pipeline {
         }
 
         stage('Execute Tests') {
+            agent { label 'nodo_docker' }
             steps {
                 script {
                     // Ejecutar las pruebas del proyecto usando Maven
