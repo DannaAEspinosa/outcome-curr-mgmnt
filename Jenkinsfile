@@ -40,15 +40,14 @@ pipeline {
                 }
             }
         }
-	post {
-                always {
-                     archiveArtifacts artifacts: 'outcome-curr-mgmt-coverage/target/site/jacocoaggregate/**/*', allowEmptyArchive: true
-                }
-            }
-        }
     }
 
     post {
+        always {
+            // Archivar artefactos, como reportes de JaCoCo
+            archiveArtifacts artifacts: 'outcome-curr-mgmt-coverage/target/site/jacocoaggregate/**/*', allowEmptyArchive: true
+        }
+        
         success {
             // Mensaje cuando el pipeline se ejecuta exitosamente
             echo 'Pipeline completed successfully!'
